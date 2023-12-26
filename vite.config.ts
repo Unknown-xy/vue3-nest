@@ -3,9 +3,12 @@ import vue from "@vitejs/plugin-vue";
 import path from "path";
 import UnoCSS from "unocss/vite";
 import { presetUno, presetAttributify } from "unocss";
+import AutoImport from "unplugin-auto-import/vite";
+import Components from "unplugin-vue-components/vite";
+import { NaiveUiResolver } from "unplugin-vue-components/resolvers";
 
 // https://vitejs.dev/config/
-export default defineConfig(({mode}) => {
+export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
   return {
     plugins: [
@@ -13,6 +16,30 @@ export default defineConfig(({mode}) => {
       UnoCSS({
         presets: [presetUno(), presetAttributify()],
         shortcuts: [],
+      }),
+      AutoImport({
+        include: [
+          /\.[tj]sx?$/, // .ts, .tsx, .js, .jsx
+          /\.vue$/,
+          /\.vue\?vue/, // .vue
+          /\.md$/, // .md
+        ],
+        imports: [
+          "vue",
+          "vue-router",
+          {
+            "naive-ui": [
+              "useDialog",
+              "useMessage",
+              "useNotification",
+              "useLoadingBar",
+            ],
+          },
+        ],
+        dts: "./src/auto-imports.d.ts",
+      }),
+      Components({
+        resolvers: [NaiveUiResolver()],
       }),
     ],
     resolve: {
